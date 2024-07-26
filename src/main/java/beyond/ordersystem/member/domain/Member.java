@@ -3,9 +3,12 @@ package beyond.ordersystem.member.domain;
 import beyond.ordersystem.common.domain.Address;
 import beyond.ordersystem.common.domain.BaseTimeEntity;
 import beyond.ordersystem.member.dto.MemberResDto;
+import beyond.ordersystem.ordering.domain.Ordering;
+import beyond.ordersystem.ordering.service.OrderingService;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -27,6 +30,9 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Ordering> orderings;
 
     public MemberResDto fromEntity(){
         return MemberResDto.builder()
