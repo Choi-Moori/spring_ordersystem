@@ -20,15 +20,15 @@ public class MemberCreateResDto {
     @NotEmpty(message = "email is essential")
     private String email;
     @NotEmpty(message = "password is essential")
-    @Size(min = 8, message = "password minimum length is 8")
+//    @Size(min = 8, message = "password minimum length is 8")
     private String password;
     private Address address;
 
-    public Member toEntity(){
+    public Member toEntity(String password){
         return Member.builder()
                 .name(this.name)
                 .email(this.email)
-                .password(this.password)
+                .password(password)
                 .address(this.address)
                 .role(Role.USER)
                 .build();

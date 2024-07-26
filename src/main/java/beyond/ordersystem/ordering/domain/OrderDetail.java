@@ -1,5 +1,6 @@
 package beyond.ordersystem.ordering.domain;
 
+import beyond.ordersystem.ordering.dto.OrderListResDto;
 import beyond.ordersystem.product.domain.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,4 +29,13 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "ordering_id")
     private Ordering ordering;
+
+
+    public OrderListResDto.OrderDetailDto fromEntity(){
+        return OrderListResDto.OrderDetailDto.builder()
+                .id(this.id)
+                .productName(this.product.getName())
+                .count(this.quantity)
+                .build();
+    }
 }

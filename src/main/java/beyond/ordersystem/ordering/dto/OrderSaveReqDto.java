@@ -1,7 +1,6 @@
 package beyond.ordersystem.ordering.dto;
 
 import beyond.ordersystem.member.domain.Member;
-import beyond.ordersystem.ordering.domain.OrderDetail;
 import beyond.ordersystem.ordering.domain.OrderStatus;
 import beyond.ordersystem.ordering.domain.Ordering;
 import lombok.AllArgsConstructor;
@@ -9,17 +8,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Embedded;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderCreateDto {
+public class OrderSaveReqDto {
     private Long memberId;
-    private List<OrderCreateDto.OrderInfoDto> orderInfoDto;
+    private List<OrderSaveReqDto.OrderInfoDto> orderInfoDto;
 
     @Data
     public static class OrderInfoDto {
@@ -27,4 +24,10 @@ public class OrderCreateDto {
         private Integer productCount;
     }
 
+    public Ordering toEntity(Member member){
+        return Ordering.builder()
+                .member(member)
+                .orderStatus(OrderStatus.ORDERED)
+                .build();
+    }
 }
