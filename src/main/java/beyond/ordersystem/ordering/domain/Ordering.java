@@ -34,20 +34,21 @@ public class Ordering {
 
     public OrderListResDto toEntity(){
         List<OrderListResDto.OrderDetailDto> OrderDetailDtos = new ArrayList<>();
-
         for(OrderDetail orderDetail : this.orderDetails){
             OrderDetailDtos.add(OrderListResDto.fromEntity(orderDetail));
         }
-
 //        for(OrderDetail orderDetail : this.orderDetails){
 //            OrderDetailDtos.add(orderDetail.fromEntity());
 //        }
-
         return OrderListResDto.builder()
                 .id(this.id)
                 .memberEmail(this.member.getEmail())
                 .orderStatus(this.orderStatus)
                 .orderDetailDtos(OrderDetailDtos)
                 .build();
+    }
+
+    public void cancelOrdering(OrderStatus orderStatus){
+        this.orderStatus = orderStatus;
     }
 }

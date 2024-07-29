@@ -29,7 +29,6 @@ public class JwtAuthFilter extends GenericFilter {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-
     private final HttpServletResponse httpServletResponse;
 
     public JwtAuthFilter(HttpServletResponse httpServletResponse) {
@@ -45,7 +44,6 @@ public class JwtAuthFilter extends GenericFilter {
 //          token은 관례적으로 Bearer 로 시작하는 문구를 넣어서 요청한다.
                 if (!bearerToken.substring(0, 7).equals("Bearer "))
                     throw new AuthenticationException("적절한 토큰 형식이 아닙니다.");
-
                 String token = bearerToken.substring(7);
 //            token 검증 및 claims 추출
 //            claims : 토큰 사용자에 대한 정보.

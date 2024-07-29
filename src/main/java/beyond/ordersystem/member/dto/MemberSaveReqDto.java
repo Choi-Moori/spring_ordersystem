@@ -9,13 +9,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class MemberCreateResDto {
+public class MemberSaveReqDto {
     private String name;
     @NotEmpty(message = "email is essential")
     private String email;
@@ -23,6 +22,7 @@ public class MemberCreateResDto {
 //    @Size(min = 8, message = "password minimum length is 8")
     private String password;
     private Address address;
+    private Role role = Role.USER;
 
     public Member toEntity(String password){
         return Member.builder()
@@ -30,7 +30,7 @@ public class MemberCreateResDto {
                 .email(this.email)
                 .password(password)
                 .address(this.address)
-                .role(Role.USER)
+                .role(this.role)
                 .build();
     }
 }

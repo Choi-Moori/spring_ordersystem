@@ -2,7 +2,7 @@ package beyond.ordersystem.member.service;
 
 import beyond.ordersystem.common.dto.CommonResDto;
 import beyond.ordersystem.member.domain.Member;
-import beyond.ordersystem.member.dto.MemberCreateResDto;
+import beyond.ordersystem.member.dto.MemberSaveReqDto;
 import beyond.ordersystem.member.dto.MemberLoginDto;
 import beyond.ordersystem.member.dto.MemberResDto;
 import beyond.ordersystem.member.repository.MemberRepository;
@@ -12,12 +12,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class MemberService {
@@ -31,7 +30,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    public ResponseEntity<CommonResDto> memberCreate(MemberCreateResDto dto){
+    public ResponseEntity<CommonResDto> memberCreate(MemberSaveReqDto dto){
         if(dto.getPassword().length()<8){
             throw new IllegalArgumentException("비밀번호가 너무 짧습니다.");
         }
@@ -57,5 +56,15 @@ public class MemberService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 
         return member;
+    }
+
+    public MemberResDto myInfo(){
+        Member member = memberRepository.findByEmail(
+                SecurityContextHolder.getContext()
+                                     .getAuthentication()
+                                     .getName())
+                .orElseThrow(()-> new EntityNotFoundException("not found"));
+
+        return member.fromEntity();
     }
 }

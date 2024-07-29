@@ -2,5 +2,5 @@ package beyond.ordersystem.ordering.domain;
 
 public enum OrderStatus {
     ORDERED,
-    CANCLED
+    CANCELED
 }
