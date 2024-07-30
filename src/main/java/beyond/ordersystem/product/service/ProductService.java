@@ -48,6 +48,24 @@ public class ProductService {
         return product;
     }
 
+    public Product productAwsCreate(ProductCreateReqDto dto){
+        MultipartFile image = dto.getImagePath();
+        Product product = null;
+        try {
+            product = productRepository.save(dto.toEntity());
+            byte[] bytes = image.getBytes();
+            Path path = Paths.get("C:/Users/anflw/Desktop/BeyondCamp/temp/",
+                    product.getId() + "_" + image.getOriginalFilename());
+            Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+
+            product.updateImagePath(path.toString());
+        }catch (IOException e){
+//            트렌젝션 처리를 하기 위해 예외를 던져준다.
+            throw new RuntimeException("image save failed");
+        }
+        return product;
+    }
+
     public Page<ProductResDto> productList(Pageable pageable){
         Page<Product> products = productRepository.findAll(pageable);
 
