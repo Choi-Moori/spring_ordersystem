@@ -1,5 +1,6 @@
 package beyond.ordersystem.ordering.service;
 
+import beyond.ordersystem.common.service.StockInventoryService;
 import beyond.ordersystem.member.domain.Member;
 import beyond.ordersystem.member.repository.MemberRepository;
 import beyond.ordersystem.ordering.domain.OrderDetail;
@@ -7,6 +8,7 @@ import beyond.ordersystem.ordering.domain.OrderStatus;
 import beyond.ordersystem.ordering.domain.Ordering;
 import beyond.ordersystem.ordering.dto.OrderSaveReqDto;
 import beyond.ordersystem.ordering.dto.OrderListResDto;
+import beyond.ordersystem.ordering.dto.StockDecreaseEvent;
 import beyond.ordersystem.ordering.repository.OrderDetailRepository;
 import beyond.ordersystem.ordering.repository.OrderingRepository;
 import beyond.ordersystem.product.domain.Product;
@@ -28,13 +30,17 @@ public class OrderingService {
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final StockInventoryService stockInventoryService;
+    private final StockDecreaseEventHandler stockDecreaseEventHandler;
 
     @Autowired
-    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository) {
+    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler) {
         this.orderingRepository = orderingRepository;
         this.memberRepository = memberRepository;
         this.productRepository = productRepository;
         this.orderDetailRepository = orderDetailRepository;
+        this.stockInventoryService = stockInventoryService;
+        this.stockDecreaseEventHandler = stockDecreaseEventHandler;
     }
 
 //    public Long orderCreate(OrderCreateDto dto){
@@ -57,21 +63,7 @@ public class OrderingService {
 //        return ordering.getId();
 //    }
 
-    public Ordering orderCreate(List<OrderSaveReqDto> dto){
-//        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(()->new EntityNotFoundException("해당 ID가 존재하지 않습니다."));
-//        Ordering ordering = dto.toEntity(member);
-//
-//        for(OrderCreateDto.OrderInfoDto dtos : dto.getOrderInfoDto()){
-//            Product product = productRepository.findById(dtos.getProductId()).orElseThrow(() -> new EntityNotFoundException("해당 상품 ID가 존재하지 않습니다."));
-//            OrderDetail orderDetail = OrderDetail.builder()
-//                    .product(product)
-//                    .ordering(ordering)
-//                    .quantity(dtos.getProductCount())
-//                    .build();
-//            ordering.getOrderDetails().add(orderDetail);
-//        }
-//        return orderingRepository.save(ordering);
-
+    public Ordering orderCreate(List<OrderSaveReqDto> dtos){
 //        방법2. JPA에 최적화된 방식
 //        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(()->new EntityNotFoundException("해당 ID가 존재하지 않습니다."));
 
@@ -83,18 +75,31 @@ public class OrderingService {
                 .member(member)
                 .build();
 
-        for(OrderSaveReqDto dtos : dto){
-            Product product = productRepository.findById(dtos.getProductId()).orElseThrow(() -> new EntityNotFoundException("해당 상품 ID가 존재하지 않습니다."));
-            int quantity = dtos.getProductCount();
-            if(product.getStockQuantity() < quantity)
-                throw new IllegalArgumentException(product.getName() + "상품 재고 부족");
+        for(OrderSaveReqDto dto : dtos){
+            Product product = productRepository.findById(dto.getProductId()).orElseThrow(() -> new EntityNotFoundException("해당 상품 ID가 존재하지 않습니다."));
+            int quantity = dto.getProductCount();
+
+            if(product.getName().contains("sale")){
+//                redis를 통한 재고관리 및 재고잔량 확인
+                int newQuantity = stockInventoryService.decreaseStock(dto.getProductId(), dto.getProductCount()).intValue();
+                if(newQuantity < 0){
+                    throw new IllegalArgumentException("재고 부족");
+                }
+//                rdb에 재고를 업데이트. rabbitmq를 통해 비동기적으로 이벤트 처리.
+                stockDecreaseEventHandler.publish(new StockDecreaseEvent(product.getId(), dto.getProductCount()));
+            }
+            else{
+                if(product.getStockQuantity() < quantity)
+                    throw new IllegalArgumentException(product.getName() + "상품 재고 부족");
+                product.updateStockQuantity(quantity);
+            }
+//            변경감지(dirty checking)로 인해 별도의 save 불필요
             OrderDetail orderDetail = OrderDetail.builder()
                     .product(product)
                     .ordering(ordering)
                     .quantity(quantity)
                     .build();
             ordering.getOrderDetails().add(orderDetail);
-            product.updateStockQuantity(quantity);
         }
         return orderingRepository.save(ordering);
     }
@@ -130,3 +135,19 @@ public class OrderingService {
         return ordering.toEntity();
     }
 }
+
+
+//      OrderCreate
+//        Member member = memberRepository.findById(dto.getMemberId()).orElseThrow(()->new EntityNotFoundException("해당 ID가 존재하지 않습니다."));
+//        Ordering ordering = dto.toEntity(member);
+//
+//        for(OrderCreateDto.OrderInfoDto dtos : dto.getOrderInfoDto()){
+//            Product product = productRepository.findById(dtos.getProductId()).orElseThrow(() -> new EntityNotFoundException("해당 상품 ID가 존재하지 않습니다."));
+//            OrderDetail orderDetail = OrderDetail.builder()
+//                    .product(product)
+//                    .ordering(ordering)
+//                    .quantity(dtos.getProductCount())
+//                    .build();
+//            ordering.getOrderDetails().add(orderDetail);
+//        }
+//        return orderingRepository.save(ordering);

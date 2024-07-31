@@ -27,13 +27,13 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<?> productCreate(ProductCreateReqDto dto){
-        Product product = productService.productAwsCreate(dto);
+        Product product = productService.productCreate(dto);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.CREATED, "product is successfully created", product.getId());
 
         return new ResponseEntity<>(commonResDto, HttpStatus.CREATED);
     }
 
-    @PostMapping("/list")
+    @GetMapping("/list")
     public ResponseEntity<?> productList(Pageable pageable){
         Page<ProductResDto> dtos = productService.productList(pageable);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "product is Created", dtos);

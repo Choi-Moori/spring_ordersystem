@@ -47,9 +47,7 @@ public class RedisConfig {
 //        configuration.setPassword("1234");
         configuration.setDatabase(1);
         return new LettuceConnectionFactory(configuration);
-
     }
-
 
     /**
      * redisTemplate 정의
@@ -71,12 +69,32 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         return redisTemplate;
     }
-
     /**
      * redisTemplate를 불러다가 .opsForValue().set(key,value)
      * redisTemplate.opsForValue().get(key)
      * redisTemplate.opsForValue().increment 또는 decrement
      * => redisTemplate를 통해 메서드가 제공됨
      */
+    @Bean
+    @Qualifier("3")
+    public RedisConnectionFactory redisStockFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setHostName(host);
+        configuration.setPort(port);
+        configuration.setDatabase(2);
+        return new LettuceConnectionFactory(configuration);
+    }
+    @Bean
+    @Qualifier("3")
+    public RedisTemplate<String, Object> StockredisTemplate(@Qualifier("3") RedisConnectionFactory redisStockFactory){
 
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        // string 형태를 직렬화 시키게따 (java에 string으로 들어가게)
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        // 제이슨 직렬화 툴 세팅
+        redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // 주입받은 connection을 넣어줌
+        redisTemplate.setConnectionFactory(redisStockFactory);
+        return redisTemplate;
+    }
 }
