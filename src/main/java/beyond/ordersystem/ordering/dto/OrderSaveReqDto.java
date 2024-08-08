@@ -16,15 +16,7 @@ import java.util.List;
 @Builder
 public class OrderSaveReqDto {
     private Long productId;
-    private Integer productCount;
-//    private Long memberId;
-//    private List<OrderSaveReqDto.OrderInfoDto> orderInfoDto;
-//
-//    @Data
-//    public static class OrderInfoDto {
-//        private Long productId;
-//        private Integer productCount;
-//    }
+    private Integer productCnt;
 
     public Ordering toEntity(Member member){
         return Ordering.builder()

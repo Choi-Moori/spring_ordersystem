@@ -27,10 +27,12 @@ public class CommonExceptionHandler {
         return new ResponseEntity<>(commonErrorDto, HttpStatus.BAD_REQUEST);
     }
 
+    // validation 에러 잡아가기
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CommonErrorDto> badRequestHandler(MethodArgumentNotValidException e){
+    public ResponseEntity<CommonErrorDto> validHandler(MethodArgumentNotValidException e) {
         e.printStackTrace();
-        CommonErrorDto commonErrorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), "argument is not valid");
+        // ⭐⭐⭐ 원하는 field 에러 터뜨리기 => getFieldError().getDefaultMessage()
+        CommonErrorDto commonErrorDto = new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), e.getFieldError().getDefaultMessage());
         return new ResponseEntity<>(commonErrorDto, HttpStatus.BAD_REQUEST);
     }
 

@@ -45,4 +45,8 @@ public class Product extends BaseTimeEntity {
     public void updateStockQuantity(int quantity){
         this.stockQuantity = this.stockQuantity-quantity;
     }
+
+    public void cancelOrdering(int quantity){
+        this.stockQuantity += quantity;
+    }
 }

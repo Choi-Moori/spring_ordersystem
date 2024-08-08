@@ -5,6 +5,7 @@ import beyond.ordersystem.ordering.domain.Ordering;
 import beyond.ordersystem.ordering.dto.OrderSaveReqDto;
 import beyond.ordersystem.ordering.dto.OrderListResDto;
 import beyond.ordersystem.ordering.service.OrderingService;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class OrderingController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/list")
+    @GetMapping("/list")
     @ResponseBody
     public ResponseEntity<?> orderList(){
         List<OrderListResDto> orderList = orderingService.orderList();
@@ -53,11 +54,11 @@ public class OrderingController {
 
 //    admin사용자가 주문 취소 : /order/{id}/cancel -> orderstatus만 변경
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/{id}/cancel")
+    @PatchMapping("/{id}/cancel")
     @ResponseBody
     public ResponseEntity<?> orderCancel(@PathVariable Long id){
-        OrderListResDto orderListResDto = orderingService.orderCancel(id);
-        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "취소 완료", orderListResDto);
+        Ordering ordering = orderingService.orderCancel(id);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "취소 완료", ordering);
         return new ResponseEntity<>(commonResDto, HttpStatus.OK);
     }
 }

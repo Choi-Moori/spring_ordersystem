@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,7 +20,7 @@ public class MemberSaveReqDto {
     @NotEmpty(message = "email is essential")
     private String email;
     @NotEmpty(message = "password is essential")
-//    @Size(min = 8, message = "password minimum length is 8")
+    @Size(min = 8, message = "password minimum length is 8")
     private String password;
     private Address address;
     private Role role = Role.USER;

@@ -29,12 +29,6 @@ public class JwtAuthFilter extends GenericFilter {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-    private final HttpServletResponse httpServletResponse;
-
-    public JwtAuthFilter(HttpServletResponse httpServletResponse) {
-        this.httpServletResponse = httpServletResponse;
-    }
-
     //    GenericFilter 상속 시 dofilter를 오버라이드 하도록 강제한다.
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

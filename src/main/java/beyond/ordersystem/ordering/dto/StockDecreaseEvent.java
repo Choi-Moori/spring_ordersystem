@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockDecreaseEvent {
-
     private Long productId;
     private Integer productCount;
 }

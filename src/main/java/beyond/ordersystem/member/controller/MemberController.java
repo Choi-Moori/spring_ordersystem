@@ -4,10 +4,7 @@ import beyond.ordersystem.common.auth.JwtTokenProvider;
 import beyond.ordersystem.common.dto.CommonErrorDto;
 import beyond.ordersystem.common.dto.CommonResDto;
 import beyond.ordersystem.member.domain.Member;
-import beyond.ordersystem.member.dto.MemberRefreshDto;
-import beyond.ordersystem.member.dto.MemberSaveReqDto;
-import beyond.ordersystem.member.dto.MemberLoginDto;
-import beyond.ordersystem.member.dto.MemberResDto;
+import beyond.ordersystem.member.dto.*;
 import beyond.ordersystem.member.service.MemberService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -58,7 +55,7 @@ public class MemberController {
 
 //    admin만 회원목록 전체 조회 가능.
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/list")
+    @GetMapping("/list")
     public ResponseEntity<?> memberList(Pageable pageable){
         Page<MemberResDto> dtos = memberService.memberList(pageable);
         CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "members are found", dtos);
@@ -94,7 +91,17 @@ public class MemberController {
         return new ResponseEntity<>(commonResDto,HttpStatus.OK);
     }
 
+    @PatchMapping("/reset-password")
+    @ResponseBody
+    public ResponseEntity<?> doResetPassword(@RequestBody MemberPasswordResetDto dto){
+        memberService.resetPassword(dto);
+        CommonResDto commonResDto = new CommonResDto(HttpStatus.OK, "password reset successful", "ok");
+
+        return new ResponseEntity<>(commonResDto, HttpStatus.OK);
+    }
+
     @PostMapping("/refresh-token")
+    @ResponseBody
     public ResponseEntity<?> generateNewAccessToken(@RequestBody MemberRefreshDto dto){
         String rt = dto.getRefreshToken();
         Claims claims = null;
@@ -103,8 +110,8 @@ public class MemberController {
             claims = Jwts.parser().setSigningKey(secretKeyRt).parseClaimsJws(rt).getBody();
         }catch (Exception e){
             return new ResponseEntity<>(
-                    new CommonErrorDto(HttpStatus.UNAUTHORIZED.value(), "invalid refresh token"),
-                    HttpStatus.UNAUTHORIZED);
+                    new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), "invalid refresh token"),
+                    HttpStatus.BAD_REQUEST);
         }
 
         String email = claims.getSubject();
@@ -116,8 +123,8 @@ public class MemberController {
         Object obj = redisTemplate.opsForValue().get(email);
         if(obj == null || !obj.toString().equals(rt)) {
             return new ResponseEntity<>(
-                    new CommonErrorDto(HttpStatus.UNAUTHORIZED.value(), "invalid refresh token"),
-                    HttpStatus.UNAUTHORIZED);
+                    new CommonErrorDto(HttpStatus.BAD_REQUEST.value(), "invalid refresh token"),
+                    HttpStatus.BAD_REQUEST);
         }
         String newAt = jwtTokenProvider.createToken(email, role);
         //        생성된 토큰을 CommonResDto에 담아 사용자에게 return

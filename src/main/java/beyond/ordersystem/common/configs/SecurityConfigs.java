@@ -31,7 +31,7 @@ public class SecurityConfigs {
                 .httpBasic().disable()
                 .authorizeRequests()
                     // member/create 페이지 제외, / : 홈 화면 제외, doLogin 화면 제외
-                    .antMatchers("/member/create", "/", "/member/doLogin", "/member/refresh-token, ","/product/list")
+                    .antMatchers("/member/create", "/", "/member/doLogin", "/member/refresh-token","/product/list", "/member/reset-password")
                     .permitAll()
                 .anyRequest().authenticated()
                 .and()
