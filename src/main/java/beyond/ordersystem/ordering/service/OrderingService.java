@@ -3,6 +3,7 @@ package beyond.ordersystem.ordering.service;
 import beyond.ordersystem.common.service.StockInventoryService;
 import beyond.ordersystem.member.domain.Member;
 import beyond.ordersystem.member.repository.MemberRepository;
+import beyond.ordersystem.ordering.controller.SseController;
 import beyond.ordersystem.ordering.domain.OrderDetail;
 import beyond.ordersystem.ordering.domain.OrderStatus;
 import beyond.ordersystem.ordering.domain.Ordering;
@@ -34,15 +35,17 @@ public class OrderingService {
     private final OrderDetailRepository orderDetailRepository;
     private final StockInventoryService stockInventoryService;
     private final StockDecreaseEventHandler stockDecreaseEventHandler;
+    private final SseController sseController;
 
     @Autowired
-    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler) {
+    public OrderingService(OrderingRepository orderingRepository, MemberRepository memberRepository, ProductRepository productRepository, OrderDetailRepository orderDetailRepository, StockInventoryService stockInventoryService, StockDecreaseEventHandler stockDecreaseEventHandler, SseController sseController) {
         this.orderingRepository = orderingRepository;
         this.memberRepository = memberRepository;
         this.productRepository = productRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.stockInventoryService = stockInventoryService;
         this.stockDecreaseEventHandler = stockDecreaseEventHandler;
+        this.sseController = sseController;
     }
 
 //    public Long orderCreate(OrderCreateDto dto){
@@ -83,7 +86,6 @@ public class OrderingService {
                 //.orderDetails()
                 .build();
 
-
         for(OrderSaveReqDto orderCreateReqDto : dtos){
             Product product = productRepository.findById(orderCreateReqDto.getProductId()).orElse(null);
             System.out.println(orderCreateReqDto);
@@ -123,6 +125,9 @@ public class OrderingService {
             ordering.getOrderDetails().add(orderDetail);
         }
         Ordering savedOrdering = orderingRepository.save(ordering);
+
+//        보내려 하는 정보와, 보내고자 하는 사람의 이메일을 보낸다.
+        sseController.publishMessage(savedOrdering.toEntity(), "admin@test.com");
         return savedOrdering;
     }
 
