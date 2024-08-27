@@ -34,6 +34,6 @@ jobs:
             if ! type docker > /dev/null ; then
               sudo snap install docker || echo "docker install failed"
             fi
-            sudo docker login --username ${{secrets.DOCKER_EMAIL}} --password ${{secrets.DOCKER_PASSWORD}}
-# pull 을 넣으면 새로운 이미지를 땡겨와서 갈아끼워준다 
+            sudo docker login --usernmae ${{secrets.DOCKER_EMAIL}} --password ${{secrets.DOCKER_PASSWORD}}
+
             sudo docker-compose pull && sudo docker-compose up -d
