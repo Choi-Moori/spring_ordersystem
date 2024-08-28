@@ -58,7 +58,7 @@ public class ProductService {
         try {
             product = productRepository.save(dto.toEntity());
             byte[] bytes = image.getBytes();
-            Path path = Paths.get("C:/Users/anflw/Desktop/BeyondCamp/temp/",
+            Path path = Paths.get("/tmp/",
                     product.getId() + "_" + image.getOriginalFilename());
             Files.write(path, bytes, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 
